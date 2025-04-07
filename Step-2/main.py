@@ -1,16 +1,16 @@
 """
 LLM PROMPT:
-You are an AI assistant tasked with converting user queries into SQL statements. The database uses SQLite and contains the following tables: - sales (sale_id, product_id, quantity, sale_date, revenue) - products (product_id, product_name, category, price) - employees (employee_id, name, department, hire_date) - customers (customer_id, customer_name, location) User Query: "Show me the top 5 products by total revenue this month." Your task is to: 1. Generate a 1 line SQL query that accurately answers the user's question. 2. Ensure the SQL is compatible with SQLite syntax. 3. Provide a short comment explaining what the query does. Output Format: - SQL Query - Explanation
-
+MUST EDIT THE PROMPT WITH THE CORRECT DESCRIPTION OF THE DATABASE
 """
 
+print("Starting...")
 import pandas as pd
 import sqlite3
 import os
 import logging
+from openai import OpenAI
 
 table_to_open = 'step1'
-
 
 # Configure logging to log errors to a file
 logging.basicConfig(filename='error.log', level=logging.ERROR, 
@@ -140,20 +140,78 @@ def list_tables(conn):
 
 def run_sql_query(conn):
 	try:
-		query = input("Enter SQL query: ").strip()
+		# Get natural language query from user
+		user_query = input("Enter your query: ").strip()
+
+		# Define prompt for ChatGPT
+
+		#- sales (sale_id, product_id, quantity, sale_date, revenue)
+        #- products (product_id, product_name, category, price)
+        #- employees (employee_id, name, department, hire_date)
+        #- customers (customer_id, customer_name, location)
+
+		client = OpenAI(
+			# This is the default and can be omitted
+			# api_key=os.environ.get("OPENAI_API_KEY"),
+		)
+
+		prompt = f"""
+		You are an AI assistant tasked with converting user queries into SQL statements. 
+        The database uses SQLite and contains the following tables:
+		- step1 (id, name, age)
+
+		User Query: "{user_query}"
+
+		Your task is to:
+        1. Generate a 1-line SQL query that accurately answers the user's question.
+        2. Ensure the SQL is compatible with SQLite syntax.
+        3. Provide a short comment explaining what the query does.
+
+        Output Format:
+        - SQL Query
+        - Explanation
+		"""
+
+		# Send prompt to ChatGPT
+		response = client.responses.create(
+			model="gpt-4o",
+			input=prompt,
+			temperature=0.6,
+			#max_tokens=1500
+		)
+
+		# Extract the generated SQL query and explanation from the response
+		print(f"Response:\n{response}\n")
+		response_text = response.output.content.text
+		print("\nChatGPT Response:")
+		print(response_text)
+
+		# Parse SQL query and explanation from the response
+		lines = response_text.split('\n')
+		sql_query = lines[0].strip()
+
+		# Execute the SQL query
+		print("\nExecuting SQL query...")
+		print(f"SQL Query: {sql_query}")
+		print("Explanation:")
+		for line in lines[1:]:
+			print(line.strip())
+		# Execute the SQL query
+				
+		#query = input("Enter SQL query: ").strip()
 		cur = conn.cursor()
-		cur.execute(query)
-		if query.lower().startswith("select"):
+		cur.execute(sql_query)
+		if sql_query.lower().startswith("select"):
 			rows = cur.fetchall()
-			print("Query results:")
+			print("SQL query results:")
 			for row in rows:
 				print(row)
 		else:
 			conn.commit()
-			print("Query executed successfully.")
+			print("SQL query executed successfully.")
 	except Exception as e:
-		logging.error(f"Error executing query: {e}")
-		print(f"Error executing query: {e}")
+		logging.error(f"Error executing SQL query: {e}")
+		print(f"Error executing SQL query: {e}")
 
 def interactive_assistant():
 	db_file = 'step4.db'
