@@ -39,7 +39,7 @@ def handle_schema_conflict(cur, table_name, columns):
 			new_table_name = input(f"Enter new name for the table: ").strip()
 			print(f"Creating new table '{new_table_name}'...")
 			# cur.execute(f"CREATE TABLE {new_table_name} ({', '.join(columns)});")
-			return new_table_name
+			return new_table_name, append
 		elif action == 'a':
 			print(f"Appending data to existing table '{table_name}'...")
 			append = True
@@ -47,10 +47,10 @@ def handle_schema_conflict(cur, table_name, columns):
 			# df.to_sql(table_name, conn, if_exists='append', index=False)
 		elif action == 's':
 			print(f"Skipping table '{table_name}'...")
-			return None
+			return None, append
 		else:
 			print("Invalid action. Skipping table creation.")
-			return None
+			return None, append
 	return table_name, append
 
 
@@ -114,8 +114,100 @@ def create_table_from_csv (csv_file, db_file):
 	finally:
 		conn.close()
 		return table_name
+	
+def list_tables(conn):
+	cur = conn.cursor()
+	cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
+	tables = cur.fetchall()
+	if tables:
+		print("Available tables:")
+		for table in tables:
+			print(f"{table[0]}:")
+			# Print table
+			cur.execute(f"SELECT * FROM {table[0]} LIMIT 10;")
+			rows = cur.fetchall()
+			#print(f"Sample data from {table[0]}:")
+			for row in rows:
+				print(row)
+	else:
+		print("No tables found in the database.")
+
+def run_sql_query(conn):
+	try:
+		query = input("Enter SQL query: ").strip()
+		cur = conn.cursor()
+		cur.execute(query)
+		if query.lower().startswith("select"):
+			rows = cur.fetchall()
+			print("Query results:")
+			for row in rows:
+				print(row)
+		else:
+			conn.commit()
+			print("Query executed successfully.")
+	except Exception as e:
+		logging.error(f"Error executing query: {e}")
+		print(f"Error executing query: {e}")
+
+def interactive_assistant():
+	db_file = 'step4.db'
+	conn = sqlite3.connect(db_file)
+
+	while True:
+		print("\nOptions:")
+		print("1. Load a CSV file into the database")
+		print("2. List available tables in the database")
+		print("3. Run a custom SQL query")
+		print("4. Exit")
+		choice = input("Choose an option (1-4): ").strip()
+
+		if choice == '1':
+			try:
+				csv_file = input("Enter the name of the CSV file: ").strip()
+				if csv_file.endswith('.csv'):
+					csv_file = csv_file[:-4]
+				table_name = create_table_from_csv(csv_file + '.csv', db_file)
+				if table_name is None:
+					print("No table created. Exiting.")
+					exit()
+
+				# Test if the table is created correctly
+				#conn = sqlite3.connect(db_to_load_into)
+				cur = conn.cursor()
+
+				cur.execute(f'SELECT * FROM {table_name}')
+				rows = cur.fetchall()
+				print(table_name + ":")
+				print(rows)
+				""" assert rows == [
+					(1, 'John Doe', 28), 
+					(2, 'Jane Smith', 34), 
+					(3, 'Emily Johnson', 22),
+					(4, 'Michael Brown', 45),
+					(5, 'Sarah Davis', 30)
+				], "FAILED: Data loaded incorrectly"
+				print("PASS: Data loaded correctly") """
+			except Exception as e:
+				logging.error(f"Error: {e}")
+				print(f"Error: {e}")
+		elif choice == '2':
+			list_tables(conn)
+		elif choice == '3':
+			run_sql_query(conn)
+		elif choice == '4':
+			print("Exiting...")
+			break
+		else:
+			print("Invalid choice. Please try again.")
+	
+	conn.close()
 
 
+if __name__ == "__main__":
+	interactive_assistant()
+
+
+""" Step 3 old
 try:
 	csv_file_to_load = input("Name of csv file to load into database: ")
 	if csv_file_to_load.endswith('.csv'):
@@ -135,14 +227,7 @@ try:
 	rows = cur.fetchall()
 	print(table_name + ":")
 	print(rows)
-	""" assert rows == [
-		(1, 'John Doe', 28), 
-		(2, 'Jane Smith', 34), 
-		(3, 'Emily Johnson', 22),
-		(4, 'Michael Brown', 45),
-		(5, 'Sarah Davis', 30)
-	], "FAILED: Data loaded incorrectly"
-	print("PASS: Data loaded correctly") """
+	
 except Exception as e:
 	logging.error(f"Error: {e}")
-	print(f"Error: {e}")
+	print(f"Error: {e}") """
