@@ -1,0 +1,33 @@
+2025-04-07 14:48:54,439:ERROR:Error processing file step1.csv: there is already another table or index with this name: step1_v0
+2025-04-07 14:49:55,558:ERROR:Error processing file step1.csv: there is already another table or index with this name: step1_v0
+2025-04-07 14:50:46,330:ERROR:Error processing file step1.csv: there is already another table or index with this name: step1_v0
+2025-04-07 14:51:39,881:ERROR:Error processing file step1.csv: there is already another table or index with this name: step1_v0
+2025-04-07 14:54:46,933:ERROR:Error processing file step1.csv: table step1_v2 already exists
+2025-04-07 14:55:11,521:ERROR:Error processing file step1.csv: table step1_v5 already exists
+2025-04-07 14:55:34,861:ERROR:Error processing file step1.csv: table step1 already exists
+2025-04-07 14:58:03,123:ERROR:Error processing file step1.csv: table step1 already exists
+2025-04-07 14:59:42,037:ERROR:Error processing file step1.csv: table step1 already exists
+2025-04-07 15:02:14,653:ERROR:Error processing file step1.csv: there is already another table or index with this name: step1_v2
+2025-04-07 15:02:29,098:ERROR:Error processing file step1.csv: cannot unpack non-iterable NoneType object
+2025-04-07 15:12:43,671:ERROR:Error: name 'csv_file_to_load' is not defined
+2025-04-07 15:16:56,090:ERROR:Error processing file step1.csv: too many values to unpack (expected 2)
+2025-04-07 15:22:12,162:ERROR:Error processing file step1.csv: too many values to unpack (expected 2)
+2025-04-07 15:45:20,292:ERROR:Error executing query: near "(": syntax error
+2025-04-07 15:48:59,089:ERROR:Error executing query: You can only execute one statement at a time.
+2025-04-07 15:50:08,580:ERROR:Error executing query: table sqlite_sequence may not be dropped
+2025-04-07 16:46:59,487:ERROR:Error executing SQL query: 
+
+You tried to access openai.ChatCompletion, but this is no longer supported in openai>=1.0.0 - see the README at https://github.com/openai/openai-python for the API.
+
+You can run `openai migrate` to automatically upgrade your codebase to use the 1.0.0 interface. 
+
+Alternatively, you can pin your installation to the old version, e.g. `pip install openai==0.28`
+
+A detailed migration guide is available here: https://github.com/openai/openai-python/discussions/742
+
+2025-04-07 16:49:29,427:ERROR:Error executing SQL query: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable
+2025-04-07 16:51:41,056:ERROR:Error executing SQL query: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable
+2025-04-07 19:31:44,771:ERROR:Error executing SQL query: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable
+2025-04-07 19:34:56,294:ERROR:Error executing SQL query: Responses.create() got an unexpected keyword argument 'max_tokens'
+2025-04-07 19:37:20,630:ERROR:Error executing SQL query: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-04-07 19:42:44,327:ERROR:Error executing SQL query: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
