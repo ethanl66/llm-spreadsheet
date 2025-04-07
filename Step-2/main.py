@@ -85,9 +85,11 @@ def create_table_from_csv (csv_file, db_file):
 		table_name = csv_file.split('.')[0]
 		columns = []
 		for col, dtype in df.dtypes.items():
-			sqlite_type = map_dtype_to_sqlite(dtype)
-			columns.append(f"{col} {sqlite_type}")
-			# make id columns PRIMARY KEY?
+			if col.lower() == 'id':
+				columns.append(f"{col} INTEGER PRIMARY KEY AUTOINCREMENT")
+			else:
+				sqlite_type = map_dtype_to_sqlite(dtype)
+				columns.append(f"{col} {sqlite_type}")
 
 		# Handle schema conflicts
 		table_name, append = handle_schema_conflict(cur, table_name, columns)
@@ -99,7 +101,7 @@ def create_table_from_csv (csv_file, db_file):
 		# Execute create table
 		if append:
 			create_table_stmt = f"CREATE TABLE IF NOT EXISTS {table_name} ({', '.join(columns)});"
-		elif not append:
+		else:
 			create_table_stmt = f"CREATE TABLE {table_name} ({', '.join(columns)});"
 		cur.execute(create_table_stmt)
 		conn.commit()
