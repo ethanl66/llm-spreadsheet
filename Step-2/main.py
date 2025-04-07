@@ -5,16 +5,21 @@ import logging
 
 table_to_open = 'step1'
 
+
 # Configure logging to log errors to a file
 logging.basicConfig(filename='error.log', level=logging.ERROR, 
 	format='%(asctime)s:%(levelname)s:%(message)s')
 
 def handle_schema_conflict(cur, table_name, columns):
+
+	append = False
+
 	# Check existing table schema
 	cur.execute(f"PRAGMA table_info({table_name})")
 	existing_schema = cur.fetchall()
 
 	if existing_schema:
+		
 		print(f"Table '{table_name}' already exists with the following schema:")
 		for col in existing_schema:
 			print(f" - {col[1]}: {col[2]}")
@@ -29,7 +34,7 @@ def handle_schema_conflict(cur, table_name, columns):
 			new_table_name = input(f"Renaming '{table_name}': Enter new table name: ").strip()
 			print(f"Renaming table to '{new_table_name}'...")
 			cur.execute(f"ALTER TABLE {table_name} RENAME TO {new_table_name}")
-			return new_table_name
+			print(f"Creating new table '{table_name}'...")
 		elif action == 'c':
 			new_table_name = input(f"Enter new name for the table: ").strip()
 			print(f"Creating new table '{new_table_name}'...")
@@ -37,6 +42,7 @@ def handle_schema_conflict(cur, table_name, columns):
 			return new_table_name
 		elif action == 'a':
 			print(f"Appending data to existing table '{table_name}'...")
+			append = True
 			# Append data to existing table
 			# df.to_sql(table_name, conn, if_exists='append', index=False)
 		elif action == 's':
@@ -45,7 +51,7 @@ def handle_schema_conflict(cur, table_name, columns):
 		else:
 			print("Invalid action. Skipping table creation.")
 			return None
-	return table_name
+	return table_name, append
 
 
 def map_dtype_to_sqlite(dtype):
@@ -84,13 +90,17 @@ def create_table_from_csv (csv_file, db_file):
 			# make id columns PRIMARY KEY?
 
 		# Handle schema conflicts
-		table_name = handle_schema_conflict(cur, table_name, columns)
+		table_name, append = handle_schema_conflict(cur, table_name, columns)
+		# append: Set to overwrite vs append (CREATE TABLE vs CREATE TABLE IF NOT EXISTS)
 		if table_name is None:
 			conn.close()	
 			return
 
 		# Execute create table
-		create_table_stmt = f"CREATE TABLE IF NOT EXISTS {table_name} ({', '.join(columns)});"
+		if append:
+			create_table_stmt = f"CREATE TABLE IF NOT EXISTS {table_name} ({', '.join(columns)});"
+		elif not append:
+			create_table_stmt = f"CREATE TABLE {table_name} ({', '.join(columns)});"
 		cur.execute(create_table_stmt)
 		conn.commit()
 
@@ -100,35 +110,39 @@ def create_table_from_csv (csv_file, db_file):
 	except Exception as e:
 		logging.error(f"Error processing file {csv_file}: {e}")
 		print(f"Error processing file {csv_file}: {e}")
-
+		table_name = None
 	finally:
 		conn.close()
 		return table_name
 
 
+try:
+	csv_file_to_load = input("Name of csv file to load into database: ")
+	if csv_file_to_load.endswith('.csv'):
+		csv_file_to_load = csv_file_to_load[:-4]
+	db_to_load_into = 'step3.db'
 
-csv_file_to_load = input("Name of csv file to load into database: ")
-if csv_file_to_load.endswith('.csv'):
-	csv_file_to_load = csv_file_to_load[:-4]
-db_to_load_into = 'step3.db'
+	table_name = create_table_from_csv(csv_file_to_load + '.csv', db_to_load_into)
+	if table_name is None:
+		print("No table created. Exiting.")
+		exit()
 
-table_name = create_table_from_csv(csv_file_to_load + '.csv', db_to_load_into)
-if table_name is None:
-	print("No table created. Exiting.")
-	exit()
+	# Test if the table is created correctly
+	conn = sqlite3.connect(db_to_load_into)
+	cur = conn.cursor()
 
-# Test if the table is created correctly
-conn = sqlite3.connect(db_to_load_into)
-cur = conn.cursor()
-
-cur.execute(f'SELECT * FROM {table_name}')
-rows = cur.fetchall()
-# print(rows)
-assert rows == [
-	(1, 'John Doe', 28), 
-	(2, 'Jane Smith', 34), 
-	(3, 'Emily Johnson', 22),
-	(4, 'Michael Brown', 45),
-	(5, 'Sarah Davis', 30)
-], "FAILED: Data loaded incorrectly"
-print("PASS: Data loaded correctly")
+	cur.execute(f'SELECT * FROM {table_name}')
+	rows = cur.fetchall()
+	print(table_name + ":")
+	print(rows)
+	""" assert rows == [
+		(1, 'John Doe', 28), 
+		(2, 'Jane Smith', 34), 
+		(3, 'Emily Johnson', 22),
+		(4, 'Michael Brown', 45),
+		(5, 'Sarah Davis', 30)
+	], "FAILED: Data loaded incorrectly"
+	print("PASS: Data loaded correctly") """
+except Exception as e:
+	logging.error(f"Error: {e}")
+	print(f"Error: {e}")

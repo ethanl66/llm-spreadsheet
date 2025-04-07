@@ -1,0 +1,11 @@
+2025-04-07 14:48:54,439:ERROR:Error processing file step1.csv: there is already another table or index with this name: step1_v0
+2025-04-07 14:49:55,558:ERROR:Error processing file step1.csv: there is already another table or index with this name: step1_v0
+2025-04-07 14:50:46,330:ERROR:Error processing file step1.csv: there is already another table or index with this name: step1_v0
+2025-04-07 14:51:39,881:ERROR:Error processing file step1.csv: there is already another table or index with this name: step1_v0
+2025-04-07 14:54:46,933:ERROR:Error processing file step1.csv: table step1_v2 already exists
+2025-04-07 14:55:11,521:ERROR:Error processing file step1.csv: table step1_v5 already exists
+2025-04-07 14:55:34,861:ERROR:Error processing file step1.csv: table step1 already exists
+2025-04-07 14:58:03,123:ERROR:Error processing file step1.csv: table step1 already exists
+2025-04-07 14:59:42,037:ERROR:Error processing file step1.csv: table step1 already exists
+2025-04-07 15:02:14,653:ERROR:Error processing file step1.csv: there is already another table or index with this name: step1_v2
+2025-04-07 15:02:29,098:ERROR:Error processing file step1.csv: cannot unpack non-iterable NoneType object
