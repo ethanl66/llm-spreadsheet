@@ -182,7 +182,7 @@ def run_sql_query(conn):
 
 		# Extract the generated SQL query and explanation from the response
 		print(f"Response:\n{response}\n")
-		response_text = response.output.content.text
+		response_text = response.output_text
 		print("\nChatGPT Response:")
 		print(response_text)
 
