@@ -1,7 +1,0 @@
-UX:
-
-1. Load CSV file into database
-2. List tables
-Go to chat and tell it to generate a SQL query (ex prompt from slides)
-3. Run SQL query
-4. Exit
