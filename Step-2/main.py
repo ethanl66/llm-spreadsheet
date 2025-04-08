@@ -221,7 +221,7 @@ def interactive_assistant():
 		print("\nOptions:")
 		print("1. Load a CSV file into the database")
 		print("2. List available tables in the database")
-		print("3. Run a custom SQL query")
+		print("3. Run a custom query")
 		print("4. Exit")
 		choice = input("Choose an option (1-4): ").strip()
 
