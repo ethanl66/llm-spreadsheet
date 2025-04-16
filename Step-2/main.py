@@ -138,6 +138,40 @@ def list_tables(conn):
 	else:
 		print("No tables found in the database.")
 
+def get_tables(conn):
+	cur = conn.cursor()
+	# Get schema of all tables in the database
+	cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
+	tables = cur.fetchall()
+
+	if not tables:
+		print("No tables found in the database.")
+		return None
+	
+	#print("Available tables:")
+	schema = ""
+	for table in tables:
+		table_name = table[0]
+		schema += f"\nTable: {table_name}\n"
+		schema += "Columns:\n"
+
+		# Get table columns
+		cur.execute(f"PRAGMA table_info({table_name});")
+		columns = cur.fetchall()
+		for col in columns:
+			schema += f" - {col[1]}: {col[2]}\n"
+
+		# Get table data
+		schema += "Sample Data:\n"
+		cur.execute(f"SELECT * FROM {table_name} LIMIT 25;")
+		rows = cur.fetchall()
+		for row in rows:
+			schema += f" - {row}\n"
+		schema += "\n"
+
+	#print(schema)
+	return schema
+
 def run_sql_query(conn):
 	try:
 		# Get natural language query from user
@@ -152,13 +186,15 @@ def run_sql_query(conn):
 
 		client = OpenAI(
 			# This is the default and can be omitted
-			# api_key=os.environ.get("OPENAI_API_KEY"),
+			api_key=os.environ.get("OPENAI_API_KEY"),
 		)
+
+		schema = get_tables(conn)
 
 		prompt = f"""
 		You are an AI assistant tasked with converting user queries into SQL statements. 
-        The database uses SQLite and contains the following tables:
-		- step1 (id, name, age)
+        The database uses SQLite and contains the following schema:
+		"{schema}"
 
 		User Query: "{user_query}"
 
@@ -181,21 +217,21 @@ def run_sql_query(conn):
 		)
 
 		# Extract the generated SQL query and explanation from the response
-		print(f"Response:\n{response}\n")
+		#print(f"Response:\n{response}\n")
 		response_text = response.output_text
-		print("\nChatGPT Response:")
-		print(response_text)
+		#print("\nChatGPT Response:")
+		#print(response_text)
 
 		# Parse SQL query and explanation from the response
 		lines = response_text.split('\n')
-		sql_query = lines[0].strip()
+		sql_query = lines[1].strip()
 
 		# Execute the SQL query
-		print("\nExecuting SQL query...")
-		print(f"SQL Query: {sql_query}")
-		print("Explanation:")
-		for line in lines[1:]:
-			print(line.strip())
+		#print("\nExecuting SQL query...")
+		#print(f"SQL Query: {sql_query}")
+		#print("Explanation:")
+		#for line in lines[1:]:
+			#print(line.strip())
 		# Execute the SQL query
 				
 		#query = input("Enter SQL query: ").strip()
@@ -203,7 +239,7 @@ def run_sql_query(conn):
 		cur.execute(sql_query)
 		if sql_query.lower().startswith("select"):
 			rows = cur.fetchall()
-			print("SQL query results:")
+			#print("SQL query results:")
 			for row in rows:
 				print(row)
 		else:
